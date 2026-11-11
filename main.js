@@ -6,6 +6,14 @@ import { config } from './src/config.js';
 import { handleCommand } from './src/commands.js';
 
 const logger = pino({ level: config.logLevel });
+
+// GitHub Actions smoke test: validate app startup without opening WhatsApp or
+// generating a pairing code. Never expose account credentials in workflow logs.
+if (config.smokeTest) {
+  logger.info('MISHU MD smoke test passed: configuration loaded; WhatsApp connection intentionally skipped.');
+  process.exit(0);
+}
+
 let reconnectTimer = null;
 let shuttingDown = false;
 let pairingRequested = false;
@@ -37,8 +45,6 @@ async function startBot() {
   sock.ev.on('creds.update', saveCreds);
 
   sock.ev.on('connection.update', async ({ connection, qr, lastDisconnect }) => {
-    // Baileys emits a QR update as the signal that the socket is ready
-    // for requestPairingCode. The number is entered locally, never in chat.
     if (qr && !sock.authState.creds.registered && !pairingRequested) {
       pairingRequested = true;
       try {
