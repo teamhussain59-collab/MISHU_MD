@@ -18,7 +18,7 @@ async function getPairingNumber() {
   }
   const rl = createInterface({ input: stdin, output: stdout });
   try {
-    return (await rl.question('Enter your WhatsApp number with country code (digits only): ')).replace(/\\D/g, '');
+    return (await rl.question('Enter your WhatsApp number with country code (digits only): ')).replace(/\D/g, '');
   } finally {
     rl.close();
   }
@@ -43,7 +43,7 @@ async function startBot() {
       pairingRequested = true;
       try {
         const number = await getPairingNumber();
-        if (!/^\\d{8,15}$/.test(number)) {
+        if (!/^\d{8,15}$/.test(number)) {
           throw new Error('Invalid phone number. Use 8–15 digits including country code.');
         }
         const code = await sock.requestPairingCode(number);
@@ -109,7 +109,7 @@ async function startBot() {
         || '';
 
       const parsed = body.startsWith(config.prefix)
-        ? body.slice(config.prefix.length).trim().split(/\\s+/)
+        ? body.slice(config.prefix.length).trim().split(/\s+/)
         : [];
       const [command = '', ...args] = parsed;
       if (!command) continue;
