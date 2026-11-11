@@ -18,7 +18,7 @@ A Node.js 20+ WhatsApp bot built with Baileys.
 2. Run `npm install`.
 3. Copy `.env.example` to `.env` and set your own WhatsApp number in international format.
 4. Run `npm run check` and `npm test`.
-5. Run `npm start` and pair only an account you control.
+5. Run `npm start`. In an interactive terminal, enter your number when prompted; for a private server environment, set `PAIRING_NUMBER` privately before starting.\n6. On your phone, open WhatsApp → Linked devices → Link with phone number, then enter the displayed code. Keep the code private.
 
 ## Configuration
 - `AUTO_STATUS_SEEN=false`: optionally mark received status updates as seen.
