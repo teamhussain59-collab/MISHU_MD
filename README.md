@@ -1,22 +1,44 @@
-# ★彡 MISHU MD 彡★
+# ★彡 𝐌𝐈𝐒𝐇𝐔 𝐌𝐃 彡★
 
 **Brand:** PROFACHNEL  
-**Pairing website:** MISHU MD PAIR
+**Pairing website title:** MISHU MD PAIR
 
-A Node.js 20+ WhatsApp bot project using the Baileys library.
+A Node.js 20+ WhatsApp bot built with Baileys.
 
-## Project status
+## Included
+- Owner-only command handling
+- Stylish PROFACHNEL / MISHU MD branding in bot replies
+- Ping, menu, about, privacy, and Urdu Quran ayah commands
+- Optional auto-status-seen and auto-reaction settings (off by default)
+- Command cooldown, safe reconnect handling, and structured logs
+- Multi-file authentication state stored locally
 
-Repository initialization. Features and automated tests are to be added before pairing or deployment.
+## Setup
+1. Install Node.js 20 or newer.
+2. Run `npm install`.
+3. Copy `.env.example` to `.env` and set your own WhatsApp number in international format.
+4. Run `npm run check` and `npm test`.
+5. Run `npm start` and pair only an account you control.
+
+## Configuration
+- `AUTO_STATUS_SEEN=false`: optionally mark received status updates as seen.
+- `AUTO_REACT=false`: optionally react to incoming non-status messages.
+- `AUTO_REACT_EMOJI=✨`: reaction used when auto-reaction is enabled.
+- `COMMAND_COOLDOWN_MS=3000`: minimum interval between owner commands.
+
+All optional automations are disabled by default. Set them deliberately in your private local `.env`.
+
+## Important limitations
+- The bot cannot guarantee immunity from WhatsApp restrictions or bans. Use official, low-volume behavior and stop if the account receives warnings.
+- It does not bypass bans, automate bulk messaging, or secretly archive other people's deleted messages.
+- WhatsApp profile display name must be set by the account owner in WhatsApp settings; bot replies use the MISHU MD branding.
+- Pair only accounts you own or have explicit permission to administer.
 
 ## Security
-
-- Store secrets only in environment variables; never commit `.env`, credentials, or session files.
-- Pair only WhatsApp accounts controlled by the person completing pairing.
-- Do not use the bot for spam, bulk messaging, or unsolicited broadcasts.
-- Use authorized media sources and respect copyright.
+- Never commit `.env`, auth state, session strings, QR data, or tokens.
+- Keep the repository free of credentials.
+- Respect people's privacy and copyright.
 
 ## Runtime
-
 - Node.js 20+
 - npm
