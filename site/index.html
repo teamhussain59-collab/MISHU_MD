@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080b16">
+<title>MISHU MD PAIR | PROFACHNEL</title>
+<style>
+:root{color-scheme:dark;--bg:#080b16;--panel:#11182b;--line:#253452;--cyan:#66e6ff;--muted:#a9b8d2}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 20% 10%,#152b48 0,transparent 42%),radial-gradient(ellipse at 90% 90%,#24204b 0,transparent 38%),var(--bg);font:16px/1.55 system-ui, sans-serif;color:#f4f7ff}
+main{width:min(100%,520px);padding:30px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(160deg,#151f35ee,#0d1324f5);box-shadow:0 24px 80px #0008}
+.brand{text-align:center;color:var(--cyan);font-weight:800;letter-spacing:.18em;font-size:.78rem}
+h1{text-align:center;font-size:clamp(1.8rem,7vw,2.6rem);margin:12px 0 4px;letter-spacing:.02em}
+.sub{text-align:center;color:var(--muted);margin:0 0 26px}
+.status{display:flex;gap:12px;align-items:flex-start;padding:16px;border:1px solid #735b28;background:#342a163d;border-radius:16px}
+.dot{width:10px;height:10px;flex:0 0 10px;margin-top:7px;border-radius:50%;background:#ffc857;box-shadow:0 0 14px #ffc85788}
+.status strong{display:block;color:#ffd98a}.status p{margin:4px 0 0;color:#d8d2c3;font-size:.92rem}
+h2{font-size:1rem;margin:24px 0 8px}ol{padding-left:22px;color:var(--muted);margin:8px 0 22px}li{padding:5px 0}
+a{color:var(--cyan);text-decoration:none}a:hover{text-decoration:underline}
+.note{border-top:1px solid var(--line);padding-top:18px;color:var(--muted);font-size:.88rem;text-align:center}
+footer{text-align:center;color:#7786a3;font-size:.78rem;margin-top:22px}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">PROFACHNEL</div>
+  <h1>★彡 MISHU MD 彡★</h1>
+  <p class="sub">WhatsApp Pairing Portal</p>
+  <section class="status" role="status" aria-live="polite">
+    <span class="dot" aria-hidden="true"></span>
+    <div><strong>Pairing backend not connected</strong><p>This page is online as a website only. It cannot generate a WhatsApp pairing code until a secure Baileys server is configured.</p></div>
+  </section>
+  <h2>When the secure pairing server is ready</h2>
+  <ol>
+    <li>Open WhatsApp on your own phone.</li>
+    <li>Go to <b>Linked devices</b> → <b>Link a device</b>.</li>
+    <li>Choose <b>Link with phone number instead</b>.</li>
+    <li>Enter the code shown by the trusted pairing service in WhatsApp.</li>
+  </ol>
+  <p class="note">Never share your pairing code, QR code, or session files. This website does not ask for your phone number or store WhatsApp credentials.</p>
+  <footer>© 2026 PROFACHNEL · MISHU MD</footer>
+</main>
+</body>
+</html>
