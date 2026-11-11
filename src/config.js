@@ -1,10 +1,12 @@
 import 'dotenv/config';
 
-const ownerNumber = (process.env.OWNER_NUMBER || '').replace(/\D/g, '');
+const ownerNumber = (process.env.OWNER_NUMBER || '').replace(/\\D/g, '');
+const pairingNumber = (process.env.PAIRING_NUMBER || '').replace(/\\D/g, '');
 const bool = (value, fallback = false) => value == null ? fallback : value.toLowerCase() === 'true';
 
 export const config = Object.freeze({
   ownerJid: ownerNumber ? `${ownerNumber}@s.whatsapp.net` : '',
+  pairingNumber,
   prefix: process.env.BOT_PREFIX || '.',
   sessionDir: process.env.SESSION_DIR || 'auth_info',
   logLevel: process.env.LOG_LEVEL || 'warn',
