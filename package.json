@@ -9,7 +9,8 @@
   },
   "scripts": {
     "start": "node src/index.js",
-    "check": "node --check src/index.js && node --check src/config.js && node --check src/commands.js"
+    "check": "node --check src/index.js && node --check src/config.js && node --check src/commands.js && node --check src/lib/text.js && node --check src/lib/http.js && node --check src/lib/owner.js && node --check src/services/quran.js && node --check src/commands/registry.js",
+    "test": "node --test"
   },
   "dependencies": {
     "@whiskeysockets/baileys": "7.0.0-rc14",
