@@ -1,12 +1,28 @@
 import makeWASocket, { DisconnectReason, useMultiFileAuthState } from '@whiskeysockets/baileys';
 import pino from 'pino';
+import { createInterface } from 'node:readline/promises';
+import { stdin, stdout } from 'node:process';
 import { config } from './src/config.js';
 import { handleCommand } from './src/commands.js';
 
 const logger = pino({ level: config.logLevel });
 let reconnectTimer = null;
 let shuttingDown = false;
+let pairingRequested = false;
 const lastCommandAt = new Map();
+
+async function getPairingNumber() {
+  if (config.pairingNumber) return config.pairingNumber;
+  if (!stdin.isTTY || !stdout.isTTY) {
+    throw new Error('Set PAIRING_NUMBER in your private environment, or run the bot in an interactive terminal.');
+  }
+  const rl = createInterface({ input: stdin, output: stdout });
+  try {
+    return (await rl.question('Enter your WhatsApp number with country code (digits only): ')).replace(/\\D/g, '');
+  } finally {
+    rl.close();
+  }
+}
 
 async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState(config.sessionDir);
@@ -20,7 +36,26 @@ async function startBot() {
 
   sock.ev.on('creds.update', saveCreds);
 
-  sock.ev.on('connection.update', ({ connection, lastDisconnect }) => {
+  sock.ev.on('connection.update', async ({ connection, qr, lastDisconnect }) => {
+    // Baileys emits a QR update as the signal that the socket is ready
+    // for requestPairingCode. The number is entered locally, never in chat.
+    if (qr && !sock.authState.creds.registered && !pairingRequested) {
+      pairingRequested = true;
+      try {
+        const number = await getPairingNumber();
+        if (!/^\\d{8,15}$/.test(number)) {
+          throw new Error('Invalid phone number. Use 8–15 digits including country code.');
+        }
+        const code = await sock.requestPairingCode(number);
+        logger.info('Pairing code generated. Enter it in WhatsApp > Linked devices > Link with phone number.');
+        console.log('★彡 𝐌𝐈𝐒𝐇𝐔 𝐌𝐃 彡★ pairing code:', code);
+        console.log('Do not share this code with anyone.');
+      } catch (error) {
+        pairingRequested = false;
+        logger.error({ err: error }, 'Could not generate pairing code');
+      }
+    }
+
     if (connection === 'open') {
       logger.info('★彡 𝐌𝐈𝐒𝐇𝐔 𝐌𝐃 彡★ by PROFACHNEL connected');
       if (reconnectTimer) clearTimeout(reconnectTimer);
@@ -35,6 +70,7 @@ async function startBot() {
       }
       reconnectTimer = setTimeout(() => {
         reconnectTimer = null;
+        pairingRequested = false;
         startBot().catch((error) => logger.error({ err: error }, 'Reconnect failed'));
       }, 5000);
     }
@@ -47,7 +83,6 @@ async function startBot() {
       if (!message.message) continue;
       const jid = message.key.remoteJid || '';
 
-      // Optional status-view automation; disabled unless explicitly enabled.
       if (config.autoStatusSeen && jid === 'status@broadcast') {
         try { await sock.readMessages([message.key]); }
         catch (error) { logger.warn({ err: error }, 'Could not mark status as seen'); }
@@ -56,7 +91,6 @@ async function startBot() {
 
       if (jid === 'status@broadcast' || message.key.fromMe) continue;
 
-      // Optional lightweight reaction; disabled by default.
       if (config.autoReact && !jid.endsWith('@broadcast')) {
         try {
           await sock.sendMessage(jid, { react: { text: config.autoReactEmoji, key: message.key } });
