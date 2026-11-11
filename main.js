@@ -6,6 +6,7 @@ import { handleCommand } from './src/commands.js';
 const logger = pino({ level: config.logLevel });
 let reconnectTimer = null;
 let shuttingDown = false;
+const lastCommandAt = new Map();
 
 async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState(config.sessionDir);
@@ -21,7 +22,7 @@ async function startBot() {
 
   sock.ev.on('connection.update', ({ connection, lastDisconnect }) => {
     if (connection === 'open') {
-      logger.info('★彡 MISHU MD 彡★ connected');
+      logger.info('★彡 𝐌𝐈𝐒𝐇𝐔 𝐌𝐃 彡★ by PROFACHNEL connected');
       if (reconnectTimer) clearTimeout(reconnectTimer);
       reconnectTimer = null;
     }
@@ -29,7 +30,7 @@ async function startBot() {
     if (connection === 'close' && !shuttingDown && !reconnectTimer) {
       const statusCode = lastDisconnect?.error?.output?.statusCode;
       if (statusCode === DisconnectReason.loggedOut) {
-        logger.error('WhatsApp session logged out. Pair again using the account owner’s own device.');
+        logger.error('WhatsApp session logged out. Pair again from the account owner’s own device.');
         return;
       }
       reconnectTimer = setTimeout(() => {
@@ -41,9 +42,30 @@ async function startBot() {
 
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
     if (type !== 'notify') return;
+
     for (const message of messages) {
-      if (!message.message || message.key.fromMe) continue;
-      const sender = message.key.participant || message.key.remoteJid;
+      if (!message.message) continue;
+      const jid = message.key.remoteJid || '';
+
+      // Optional status-view automation; disabled unless explicitly enabled.
+      if (config.autoStatusSeen && jid === 'status@broadcast') {
+        try { await sock.readMessages([message.key]); }
+        catch (error) { logger.warn({ err: error }, 'Could not mark status as seen'); }
+        continue;
+      }
+
+      if (jid === 'status@broadcast' || message.key.fromMe) continue;
+
+      // Optional lightweight reaction; disabled by default.
+      if (config.autoReact && !jid.endsWith('@broadcast')) {
+        try {
+          await sock.sendMessage(jid, { react: { text: config.autoReactEmoji, key: message.key } });
+        } catch (error) {
+          logger.debug({ err: error }, 'Auto-reaction skipped');
+        }
+      }
+
+      const sender = message.key.participant || jid;
       if (sender !== config.ownerJid) continue;
 
       const body = message.message.conversation
@@ -58,11 +80,19 @@ async function startBot() {
       const [command = '', ...args] = parsed;
       if (!command) continue;
 
+      const now = Date.now();
+      const previous = lastCommandAt.get(sender) || 0;
+      if (now - previous < config.commandCooldownMs) {
+        logger.warn('Owner command ignored by cooldown protection');
+        continue;
+      }
+      lastCommandAt.set(sender, now);
+
       try {
         await handleCommand(sock, message, command.toLowerCase(), args);
       } catch (error) {
         logger.error({ err: error }, 'Command execution failed');
-        await sock.sendMessage(message.key.remoteJid, {
+        await sock.sendMessage(jid, {
           text: 'Command failed. Please try again later.',
         }, { quoted: message });
       }
@@ -72,8 +102,14 @@ async function startBot() {
   return sock;
 }
 
-process.once('SIGINT', () => { shuttingDown = true; logger.info('Shutdown requested'); process.exit(0); });
-process.once('SIGTERM', () => { shuttingDown = true; logger.info('Shutdown requested'); process.exit(0); });
+function shutdown() {
+  shuttingDown = true;
+  if (reconnectTimer) clearTimeout(reconnectTimer);
+  logger.info('MISHU MD shutdown requested');
+  process.exit(0);
+}
+process.once('SIGINT', shutdown);
+process.once('SIGTERM', shutdown);
 
 startBot().catch((error) => {
   logger.error({ err: error }, 'MISHU MD startup failed');
