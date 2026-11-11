@@ -1,17 +1,32 @@
 import { config } from './config.js';
 
-const menuText = `★彡 𝐌𝐈𝐒𝐇𝐔 𝐌𝐃 彡★\n\nPROFACHNEL\n\n${config.prefix}ping  — Check bot response\n${config.prefix}menu  — Show this menu\n${config.prefix}quran <surah> <ayah> — Read an ayah (Urdu)\n\nOnly the configured owner can run commands.`;
+const menuText = `★彡 𝐌𝐈𝐒𝐇𝐔 𝐌𝐃 彡★
+PROFACHNEL
+
+${config.prefix}ping — Check bot response
+${config.prefix}menu — Show this menu
+${config.prefix}quran <surah> <ayah> — Read an ayah in Urdu
+${config.prefix}about — Bot information
+${config.prefix}privacy — Privacy and safety settings
+
+Owner-only commands. Auto features are controlled in .env.`;
 
 export async function handleCommand(sock, message, command, args) {
   const jid = message.key.remoteJid;
   const reply = (text) => sock.sendMessage(jid, { text }, { quoted: message });
 
-  if (command === 'ping') {
-    return reply('Pong! MISHU MD is online.');
+  if (command === 'ping') return reply('Pong! ★彡 MISHU MD 彡★ is online.');
+
+  if (command === 'menu' || command === 'help') return reply(menuText);
+
+  if (command === 'about') {
+    return reply('★彡 𝐌𝐈𝐒𝐇𝐔 𝐌𝐃 彡★\nBrand: PROFACHNEL\nRuntime: Node.js + Baileys\nOwner-only command access.');
   }
 
-  if (command === 'menu' || command === 'help') {
-    return reply(menuText);
+  if (command === 'privacy') {
+    return reply('Privacy defaults:\n• Auto status seen: ' + (config.autoStatusSeen ? 'ON' : 'OFF') +
+      '\n• Auto reaction: ' + (config.autoReact ? 'ON' : 'OFF') +
+      '\n• Deleted-message archiving: NOT enabled\n• Anti-ban bypass: NOT supported\n• Cooldown and spam protection: ON');
   }
 
   if (command === 'quran') {
