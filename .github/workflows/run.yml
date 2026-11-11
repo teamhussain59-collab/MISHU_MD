@@ -1,0 +1,45 @@
+name: MISHU MD - GitHub Run
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify bot project (GitHub only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Check JavaScript syntax
+        run: npm run check
+
+      - name: Run automated tests
+        run: npm test
+
+      - name: Confirm no private runtime files are tracked
+        shell: bash
+        run: |
+          if git ls-files | grep -E '(^|/)(\.env|auth_info|sessions?)(/|$)|\.env$'; then
+            echo "::error::Private environment or WhatsApp session files must not be committed."
+            exit 1
+          fi
+          echo "No tracked environment or session files found."
+
+      - name: GitHub-only result
+        run: echo "MISHU MD checks completed. No WhatsApp pairing or external deployment was performed."
