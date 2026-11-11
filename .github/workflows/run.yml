@@ -9,8 +9,8 @@ permissions:
   contents: read
 
 jobs:
-  verify:
-    name: Verify bot project (GitHub only)
+  verify-and-smoke-test:
+    name: Verify and start MISHU MD safely
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -31,6 +31,12 @@ jobs:
       - name: Run automated tests
         run: npm test
 
+      - name: Start MISHU MD smoke test
+        env:
+          BOT_SMOKE_TEST: 'true'
+          LOG_LEVEL: info
+        run: npm start
+
       - name: Confirm no private runtime files are tracked
         shell: bash
         run: |
@@ -41,4 +47,4 @@ jobs:
           echo "No tracked environment or session files found."
 
       - name: GitHub-only result
-        run: echo "MISHU MD checks completed. No WhatsApp pairing or external deployment was performed."
+        run: echo "MISHU MD startup smoke test completed. No WhatsApp login, pairing code, or external deployment was performed."
